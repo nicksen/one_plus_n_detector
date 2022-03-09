@@ -1,6 +1,8 @@
 # This file is responsible for configuring your application
 # and its dependencies with the aid of the Mix.Config module.
-use Mix.Config
+import Config
+
+config :one_plus_n_detector, env: config_env()
 
 # This configuration is loaded before any dependency and is restricted
 # to this project. If another project depends on this project, this
@@ -28,3 +30,23 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+if config_env() == :test do
+  config :logger, level: :warn
+
+  config :one_plus_n_detector, ecto_repos: [OnePlusNDetector.Repo, OnePlusNDetector.ReadReplica]
+
+  config :one_plus_n_detector, OnePlusNDetector.Repo,
+    username: "postgres",
+    password: "postgres",
+    hostname: "localhost",
+    database: "one_plus_n_test#{System.get_env("MIX_TEST_PARTITION")}",
+    pool: Ecto.Adapters.SQL.Sandbox
+
+  config :one_plus_n_detector, OnePlusNDetector.ReadReplica,
+    username: "postgres",
+    password: "postgres",
+    hostname: "localhost",
+    database: "one_plus_n_test#{System.get_env("MIX_TEST_PARTITION")}",
+    pool: Ecto.Adapters.SQL.Sandbox
+end

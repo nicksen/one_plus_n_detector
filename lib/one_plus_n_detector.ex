@@ -1,5 +1,6 @@
 defmodule OnePlusNDetector do
   use Application
+  use OnePlusNDetector.ConfigUtils, otp_app: :one_plus_n_detector
 
   @moduledoc """
   Ecto Repo's logger adapter.
@@ -10,32 +11,21 @@ defmodule OnePlusNDetector do
       ]
   """
 
-  alias OnePlusNDetector.Detector
-
-  @impl true
+  @impl Application
   def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    children = [
-      worker(OnePlusNDetector.Detector, []),
-    ]
-
-    Supervisor.start_link(children, strategy: :one_for_one)
+    Supervisor.start_link(children(), strategy: :one_for_one)
   end
 
-  def analyze(%Ecto.LogEntry{query: query} = entry) do
-    # We need to make sure our app is started or start it ourselves
-    {:ok, _} = Application.ensure_all_started(:one_plus_n_detector)
-
-    case Detector.check(query) do
-      {:match, _query, _count} ->
-        :nothing
-      {:no_match, _previous_query, count} ->
-        if count > 2 do
-          IO.puts "---------> 1+n SQL query detected, total count: #{count}"
-        end
-    end
-
-    entry
+  defp children do
+    env_specific!(
+      test: [
+        OnePlusNDetector.Repo,
+        OnePlusNDetector.ReadReplica,
+        OnePlusNDetector.Detector
+      ],
+      else: [
+        OnePlusNDetector.Detector
+      ]
+    )
   end
 end
