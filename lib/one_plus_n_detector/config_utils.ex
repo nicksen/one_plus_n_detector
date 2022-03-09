@@ -15,7 +15,7 @@ defmodule OnePlusNDetector.ConfigUtils do
           unquote(
             Keyword.get_lazy(
               conf,
-              env(),
+              Mix.env(),
               fn -> Keyword.fetch!(conf, :else) end
             )
           )
@@ -31,9 +31,4 @@ defmodule OnePlusNDetector.ConfigUtils do
   defdelegate os_env(name, default), to: System, as: :get_env
 
   defdelegate os_env!(name), to: System, as: :fetch_env!
-
-  if Code.ensure_loaded?(DeepMerge) do
-    defdelegate deep_merge(original, override), to: DeepMerge
-    defdelegate deep_merge(original, override, resolve_function), to: DeepMerge
-  end
 end

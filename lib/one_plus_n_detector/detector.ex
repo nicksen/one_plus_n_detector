@@ -4,6 +4,7 @@ defmodule OnePlusNDetector.Detector do
   """
 
   use GenServer, start: {__MODULE__, :start_link, []}
+  require Logger
 
   # Increase counter or swaps query
   def check("SELECT" <> _rest = query) do
@@ -26,7 +27,15 @@ defmodule OnePlusNDetector.Detector do
   end
 
   def handle_event(_event_name, _measurements, %{query: query}, _config) do
-    check(query)
+    case check(query) do
+      {:match, _query, _count} ->
+        :nothing
+
+      {:no_match, _previous_query, count} ->
+        if count > 2 do
+          Logger.warn("---------> 1+n SQL query detected, total count: #{count}")
+        end
+    end
   end
 
   @impl GenServer
