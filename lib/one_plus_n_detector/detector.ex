@@ -32,8 +32,10 @@ defmodule OnePlusNDetector.Detector do
         :nothing
 
       {:no_match, _previous_query, count} ->
-        if count > 2 do
-          Logger.warn("---------> 1+n SQL query detected, total count: #{count}")
+        if count > max_duplicates() do
+          if level = log_level() do
+            Logger.log(level, "---------> 1+n SQL query detected, total count: #{count}")
+          end
         end
     end
   end
@@ -73,5 +75,13 @@ defmodule OnePlusNDetector.Detector do
       end
 
     :ok = :telemetry.attach_many("one-plus-n-detector", events, &__MODULE__.handle_event/4, %{})
+  end
+
+  defp max_duplicates do
+    Application.get_env(:one_plus_n_detector, :max_duplicates, 2)
+  end
+
+  defp log_level do
+    Application.get_env(:one_plus_n_detector, :log_level, :warn)
   end
 end

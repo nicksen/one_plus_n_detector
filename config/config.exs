@@ -34,7 +34,9 @@ config :one_plus_n_detector, env: config_env()
 if config_env() == :test do
   config :logger, level: :warn
 
-  config :one_plus_n_detector, ecto_repos: [OnePlusNDetector.Repo, OnePlusNDetector.ReadReplica]
+  config :one_plus_n_detector,
+    ecto_repos: [OnePlusNDetector.Repo, OnePlusNDetector.ReadReplica],
+    log_level: false
 
   config :one_plus_n_detector, OnePlusNDetector.Repo,
     username: "postgres",
